@@ -15,6 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { useAppDispatch } from "@/store/hooks";
+import { setSidebarMode } from "@/store/slices/products-slice";
+
 const RatingStars = ({ rating }: { rating: number }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
@@ -30,6 +33,48 @@ const RatingStars = ({ rating }: { rating: number }) => {
         }
         return <Star key={i} size={14} className="opacity-20" />;
       })}
+    </div>
+  );
+};
+
+const ActionCell = ({ product }: { product: Product }) => {
+  const dispatch = useAppDispatch();
+  const isDeleted = product.status === "Soft Deleted";
+
+  return (
+    <div className="flex items-center justify-end gap-1 px-4">
+      {isDeleted ? (
+        <>
+          <Button variant="ghost" size="icon-sm" className="hover:bg-primary/10 text-primary rounded-lg transition-colors">
+            <RotateCcw size={18} strokeWidth={1.5} />
+          </Button>
+          <Button variant="ghost" size="icon-sm" className="hover:bg-error/10 text-error rounded-lg transition-colors">
+            <Trash size={18} strokeWidth={1.5} />
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button 
+            variant="ghost" 
+            size="icon-sm" 
+            className="hover:bg-primary/10 text-primary rounded-lg transition-colors"
+            onClick={() => dispatch(setSidebarMode({ mode: "view", product }))}
+          >
+            <Eye size={18} strokeWidth={1.5} />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon-sm" 
+            className="hover:bg-primary/10 text-primary rounded-lg transition-colors"
+            onClick={() => dispatch(setSidebarMode({ mode: "edit", product }))}
+          >
+            <Pencil size={18} strokeWidth={1.5} />
+          </Button>
+          <Button variant="ghost" size="icon-sm" className="hover:bg-error/10 text-error rounded-lg transition-colors">
+            <Trash2 size={18} strokeWidth={1.5} />
+          </Button>
+        </>
+      )}
     </div>
   );
 };
@@ -60,7 +105,10 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "price",
     header: () => <div className="text-[10px] font-bold uppercase tracking-widest px-4">Price</div>,
-    cell: ({ row }) => <div className="text-sm font-medium px-4">{row.getValue("price")}</div>,
+    cell: ({ row }) => {
+      const price = row.getValue("price") as number;
+      return <div className="text-sm font-medium px-4">₹{price.toLocaleString()}</div>;
+    },
   },
   {
     accessorKey: "stock",
@@ -110,34 +158,6 @@ export const columns: ColumnDef<Product>[] = [
   {
     id: "actions",
     header: () => <div className="text-[10px] font-bold uppercase tracking-widest text-right px-4">Actions</div>,
-    cell: ({ row }) => {
-      const isDeleted = row.original.status === "Soft Deleted";
-      return (
-        <div className="flex items-center justify-end gap-1 px-4">
-          {isDeleted ? (
-            <>
-              <Button variant="ghost" size="icon-sm" className="hover:bg-primary/10 text-primary rounded-lg transition-colors">
-                <RotateCcw size={18} strokeWidth={1.5} />
-              </Button>
-              <Button variant="ghost" size="icon-sm" className="hover:bg-error/10 text-error rounded-lg transition-colors">
-                <Trash size={18} strokeWidth={1.5} />
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" size="icon-sm" className="hover:bg-primary/10 text-primary rounded-lg transition-colors">
-                <Eye size={18} strokeWidth={1.5} />
-              </Button>
-              <Button variant="ghost" size="icon-sm" className="hover:bg-primary/10 text-primary rounded-lg transition-colors">
-                <Pencil size={18} strokeWidth={1.5} />
-              </Button>
-              <Button variant="ghost" size="icon-sm" className="hover:bg-error/10 text-error rounded-lg transition-colors">
-                <Trash2 size={18} strokeWidth={1.5} />
-              </Button>
-            </>
-          )}
-        </div>
-      );
-    },
+    cell: ({ row }) => <ActionCell product={row.original} />,
   },
 ];
