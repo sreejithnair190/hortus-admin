@@ -12,6 +12,7 @@ export interface FileUploaderProps {
   maxSize?: number; // in bytes
   accept?: string[]; // e.g., ["image/jpeg", "image/png", "image/webp"]
   title?: string;
+  description?: string;
   onError?: (error: string | null) => void;
   className?: string; // height/aspect-ratio overrides
   initialImageUrl?: string; // Add support for existing images

@@ -30,8 +30,8 @@ const productSchema = z.object({
   stock: z.number().min(0, "Stock cannot be negative"),
   description: z.string().optional(),
   imageUrl: z.string().min(1, "Image URL is required"),
-  seasons: z.array(z.string()).default([]),
-  classification: z.array(z.string()).default([]),
+  seasons: z.array(z.string()),
+  classification: z.array(z.string()),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
