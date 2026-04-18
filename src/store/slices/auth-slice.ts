@@ -106,9 +106,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(getCurrentUserThunk.pending, (state) => {
-        // usually we don't set global loading=true just for user refresh
-      })
+      .addCase(getCurrentUserThunk.pending, (state) => {})
       .addCase(getCurrentUserThunk.fulfilled, (state, action) => {
         state.user = action.payload.data;
       })

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       // Set the refresh token as an HttpOnly cookie
       // This ensures it is not accessible via client-side JS.
       response.cookies.set({
-        name: 'refreshToken',
+        name: 'refresh-token',
         value: refreshToken,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -36,7 +36,7 @@ export async function DELETE() {
   );
 
   // Clear the refresh token cookie
-  response.cookies.delete('refreshToken');
+  response.cookies.delete('refresh-token');
   
   return response;
 }

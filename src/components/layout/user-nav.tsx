@@ -12,9 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/store/slices/auth-slice";
+import { getCurrentUserThunk, logout } from "@/store/slices/auth-slice";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export function UserNav() {
@@ -25,6 +24,9 @@ export function UserNav() {
   // Handle hydration mismatch safely
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    dispatch(getCurrentUserThunk());
+  }, [dispatch]);
 
   const handleLogout = () => {
     dispatch(logout());

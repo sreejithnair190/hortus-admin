@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   // Check for the HttpOnly refresh token cookie on the server
-  const hasRefreshToken = request.cookies.has("refreshToken");
+  const hasRefreshToken = request.cookies.has("refresh-token");
 
   const isAuthRoute = request.nextUrl.pathname.startsWith("/sign-in");
   const isProtectedRoute = !isAuthRoute; // Update this logic if you have specific public routes

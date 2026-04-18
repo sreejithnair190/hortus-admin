@@ -130,10 +130,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data: refreshData } = await api.post<{
+        // Hit the Next.js proxy route so it can attach the HttpOnly cookie
+        const { data: refreshData } = await axios.post<{
           data: { accessToken: string; refreshToken: string };
           message: string;
-        }>(`${AUTH_ROUTE}/refresh`);
+        }>('/api/auth/refresh');
 
         const newAccessToken = refreshData.data.accessToken;
 
