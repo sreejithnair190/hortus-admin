@@ -10,7 +10,7 @@ export default function MainLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-1 w-full min-h-screen flex flex-col bg-surface text-on-surface">
+      <main className="flex-1 w-full min-h-screen flex flex-col bg-surface text-on-surface overflow-hidden">
         <Header />
         {children}
       </main>
