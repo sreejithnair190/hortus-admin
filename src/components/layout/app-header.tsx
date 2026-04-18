@@ -1,7 +1,7 @@
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { UserNav } from "./user-nav";
 
 export default function Header() {
   return (
@@ -29,17 +29,7 @@ export default function Header() {
           <Bell size={20} className="text-[#173901] transition-transform group-hover:rotate-12" strokeWidth={1.5} />
           <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-error border-2 border-surface animate-pulse"></span>
         </button>
-        
-        <div className="ml-2 flex cursor-pointer items-center gap-3 rounded-full bg-white/50 p-1.5 pr-4 transition-all hover:bg-white hover:shadow-sm border border-outline-variant/5">
-          <Avatar className="h-8 w-8 ring-1 ring-outline-variant/20">
-            <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuAclTle-uX7qkzqPwP6Xy8w5SFhAXRxXOuYv6d_3txeHbV1bCNm80uF4tBJxTGGu1gadERkIAsAIsRf9uByH_JRA4EKIOFoueeYuWjeFgq-IZa5evWMj0dI4v0WVjYhhuasCMYuC-PspdWWakjKkofizR24XNI-5p8nG8H3HZSUB-i25NYOKTJOiTXSnZXSNXeVfYtGWY-oK8yoYXabrd89IqdJyzahmm69lA6wWIDBP9lrfTnE9ELr7RvdaWhP9CMFF3zzex0DIM5c" alt="Admin Avatar" />
-            <AvatarFallback className="bg-primary-container text-on-primary font-black text-xs">A</AvatarFallback>
-          </Avatar>
-          <div className="hidden lg:block">
-            <p className="text-xs font-black text-on-surface leading-none">Botanical Admin</p>
-          </div>
-          <ChevronDown size={14} className="text-on-surface-variant" strokeWidth={2} />
-        </div>
+        <UserNav />
       </div>
     </header>
   );

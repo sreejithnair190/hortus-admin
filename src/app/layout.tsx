@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto_Flex } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import StoreProvider from "@/store/store-provider";
 
 const roboto = Roboto_Flex({
   subsets: ["latin"],
@@ -20,8 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-surface text-on-surface font-sans">
-        {children}
+        <StoreProvider>
+          {children}
+        </StoreProvider>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );
 }
+

@@ -9,7 +9,8 @@ import {
   Users,
   BarChart3,
   Settings,
-  UserCircle
+  UserCircle,
+  LogOut
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,9 +28,19 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/slices/auth-slice";
+import { useRouter } from "next/navigation";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/sign-in");
+  };
 
   return (
     <Sidebar className="border-none shadow-[8px_0_24px_-4px_rgba(12,32,13,0.06)]">
@@ -46,7 +57,7 @@ export function AppSidebar() {
                 <SidebarMenuButton 
                   isActive={pathname === "/"} 
                   className={cn(
-                    "data-[active=true]:bg-primary-container data-[active=true]:text-on-primary text-[#d6efd0] opacity-80 data-[active=true]:opacity-100 hover:bg-primary-container/50 transition-all py-6 h-auto rounded-md group-data-[collapsible=icon]:p-2",
+                    "data-[active=true]:bg-primary-container data-[active=true]:text-on-primary text-[#d6efd0] opacity-80 data-[active=true]:opacity-100 hover:bg-primary-container/50 transition-all py-3 h-auto rounded-md group-data-[collapsible=icon]:p-2",
                     pathname === "/" && "scale-95 transition-transform"
                   )}
                   render={
@@ -61,7 +72,7 @@ export function AppSidebar() {
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger render={
-                    <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 flex justify-between rounded-md transition-all">
+                    <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 flex justify-between rounded-md transition-all">
                       <div className="flex items-center gap-2">
                         <BookOpen size={20} strokeWidth={1.5} />
                         <span className="text-sm font-bold uppercase tracking-tight">Catalog</span>
@@ -98,7 +109,7 @@ export function AppSidebar() {
 
               {/* Orders */}
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
+                <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
                   render={
                     <Link href="/orders">
                       <ShoppingCart size={20} strokeWidth={1.5} />
@@ -110,7 +121,7 @@ export function AppSidebar() {
 
               {/* Customers */}
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
+                <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
                   render={
                     <Link href="/customers">
                       <Users size={20} strokeWidth={1.5} />
@@ -122,7 +133,7 @@ export function AppSidebar() {
 
               {/* Analytics */}
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
+                <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
                   render={
                     <Link href="/analytics">
                       <BarChart3 size={20} strokeWidth={1.5} />
@@ -133,8 +144,8 @@ export function AppSidebar() {
               </SidebarMenuItem>
 
               {/* Settings */}
-              <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
+              {/* <SidebarMenuItem>
+                <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
                   render={
                     <Link href="/settings">
                       <Settings size={20} strokeWidth={1.5} />
@@ -142,7 +153,7 @@ export function AppSidebar() {
                     </Link>
                   }
                 />
-              </SidebarMenuItem>
+              </SidebarMenuItem> */}
 
             </SidebarMenu>
           </SidebarGroupContent>
@@ -150,14 +161,26 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-[#2D5016]/30 p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton className="py-6 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
+        <SidebarMenu className="gap-2">
+          {/* <SidebarMenuItem>
+            <SidebarMenuButton className="py-3 h-auto text-[#d6efd0] opacity-80 hover:bg-primary-container/30 hover:text-[#d6efd0] hover:opacity-100 rounded-md transition-all"
               render={
                 <Link href="/profile">
                   <UserCircle size={20} strokeWidth={1.5} />
                   <span className="text-sm font-bold uppercase tracking-tight">Admin Profile</span>
                 </Link>
+              }
+            />
+          </SidebarMenuItem> */}
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={handleLogout}
+              className="py-3 h-auto text-error opacity-80 hover:bg-error/10 hover:text-error hover:opacity-100 rounded-md transition-all group"
+              render={
+                <button type="button" className="w-full flex items-center gap-2">
+                  <LogOut size={20} strokeWidth={1.5} className="transition-transform group-hover:-translate-x-1" />
+                  <span className="text-sm font-bold uppercase tracking-tight">Logout</span>
+                </button>
               }
             />
           </SidebarMenuItem>
