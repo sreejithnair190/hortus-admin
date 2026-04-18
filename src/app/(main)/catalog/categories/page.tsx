@@ -17,7 +17,9 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex-1 flex flex-col bg-surface/30">
-      <CategoriesClient initialData={initialData} />
+      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto h-full overflow-hidden w-full">
+        <CategoriesClient initialData={initialData} />
+      </div>
     </div>
   );
 }

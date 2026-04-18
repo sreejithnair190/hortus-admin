@@ -24,6 +24,21 @@ export interface Category {
   parent?: CategoryParent;
 }
 
+export interface CategoryChild {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryDetails extends Category {
+  children: CategoryChild[];
+}
+
+
 export interface PagedResponse<T> {
   items: T[];
   page: number;
@@ -63,6 +78,8 @@ export interface CreateCategoryPayload {
   parentId?: string;
   file?: File;
 }
+
+export interface UpdateCategoryPayload extends Partial<CreateCategoryPayload> {}
 
 export async function fetchCategories(
   params?: GetCategoriesParams
@@ -113,3 +130,36 @@ export async function createCategory(
   );
   return data.data;
 }
+
+export async function fetchCategoryById(id: string): Promise<CategoryDetails> {
+  const { data } = await api.get<ApiResponse<CategoryDetails>>(`${ADMIN_ROUTE}/categories/${id}`);
+  return data.data;
+}
+
+export async function updateCategory(
+  id: string,
+  payload: UpdateCategoryPayload
+): Promise<CategoryDetails> {
+  const formData = new FormData();
+  if (payload.name) formData.append("name", payload.name);
+  if (payload.description !== undefined) formData.append("description", payload.description);
+  if (payload.isActive !== undefined) formData.append("isActive", String(payload.isActive));
+  if (payload.parentId !== undefined) formData.append("parentId", payload.parentId);
+  if (payload.file) formData.append("file", payload.file);
+
+  const { data } = await api.put<ApiResponse<CategoryDetails>>(
+    `${ADMIN_ROUTE}/categories/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return data.data;
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  await api.delete(`${ADMIN_ROUTE}/categories/${id}`);
+}
+

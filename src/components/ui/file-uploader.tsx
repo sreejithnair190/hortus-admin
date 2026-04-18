@@ -12,9 +12,9 @@ export interface FileUploaderProps {
   maxSize?: number; // in bytes
   accept?: string[]; // e.g., ["image/jpeg", "image/png", "image/webp"]
   title?: string;
-  description?: string;
   onError?: (error: string | null) => void;
   className?: string; // height/aspect-ratio overrides
+  initialImageUrl?: string; // Add support for existing images
 }
 
 export function FileUploader({
@@ -28,6 +28,7 @@ export function FileUploader({
   description = "JPEG, PNG, WEBP — Max 15MB",
   onError,
   className,
+  initialImageUrl,
 }: FileUploaderProps) {
   const [internalError, setInternalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,6 +95,12 @@ export function FileUploader({
       >
         {previewFile && !multiple ? (
           <PreviewImage file={previewFile} />
+        ) : !previewFile && initialImageUrl && !multiple ? (
+          <img
+            src={initialImageUrl}
+            alt="Existing"
+            className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity"
+          />
         ) : null}
 
         <div className="z-10 flex flex-col items-center p-6 text-center">

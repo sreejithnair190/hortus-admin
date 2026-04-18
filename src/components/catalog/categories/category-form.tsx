@@ -14,11 +14,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownCategory,
   fetchAllCategories,
+  fetchCategoryById,
   CreateCategoryPayload,
+  UpdateCategoryPayload,
 } from "@/services/categories-service";
 import { FileUploader } from "@/components/ui/file-uploader";
+import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 
 // ── Validation Schema ────────────────────────────────────────────────
 const categorySchema = z.object({
@@ -38,14 +49,16 @@ const categorySchema = z.object({
 type CategoryFormValues = z.infer<typeof categorySchema>;
 
 interface CategoryFormProps {
-  mode: "add";
-  onSubmit: (data: CreateCategoryPayload) => void;
+  mode: "add" | "edit";
+  categoryId?: string | null;
+  onSubmit: (data: CreateCategoryPayload | UpdateCategoryPayload) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
 
 export function CategoryForm({
   mode,
+  categoryId,
   onSubmit,
   onCancel,
   isLoading,
@@ -53,6 +66,7 @@ export function CategoryForm({
   const [parentCategories, setParentCategories] = useState<DropdownCategory[]>([]);
   const [loadingParents, setLoadingParents] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
   const controlProps = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -81,6 +95,34 @@ export function CategoryForm({
     loadParents();
   }, []);
 
+  useEffect(() => {
+    if (mode === "edit" && categoryId) {
+      async function loadCategoryDetails(id: string) {
+        try {
+          const category = await fetchCategoryById(id);
+          controlProps.reset({
+            name: category.name,
+            description: category.description || "",
+            isActive: category.isActive,
+            parentId: category.parent?.id || "",
+          });
+          if (category.asset?.url) {
+            setExistingImageUrl(
+              category.asset.url.startsWith("http")
+                ? category.asset.url
+                : `https://${category.asset.url}`
+            );
+          } else {
+            setExistingImageUrl(null);
+          }
+        } catch (err) {
+          console.error("Failed to load category for editing", err);
+        }
+      }
+      loadCategoryDetails(categoryId);
+    }
+  }, [mode, categoryId, controlProps]);
+
   const handleFormSubmit = ({ data }: { data: CategoryFormValues }) => {
     const payload: CreateCategoryPayload = {
       name: data.name,
@@ -98,37 +140,19 @@ export function CategoryForm({
       onSubmit={handleFormSubmit}
       className="flex flex-col h-full bg-surface-container-lowest overflow-hidden"
     >
-      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 pb-32">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-black tracking-tighter text-on-surface">
-            Create New Category
+            {mode === "add" ? "Create New Category" : "Edit Category"}
           </h2>
           <p className="text-on-surface-variant text-sm">
-            Define a new category for organising your botanical catalogue.
+            {mode === "add" 
+              ? "Define a new category for organising your botanical catalogue." 
+              : "Update category details and availability."}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-8">
-          {/* Media Section */}
-          <Card className="border-none bg-surface-container-low/30 shadow-none ring-1 ring-outline-variant/10 rounded-2xl pt-4">
-            <CardContent className="p-6">
-              <Label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4 opacity-60">
-                Category Image
-              </Label>
-              <FileUploader
-                value={file}
-                onChange={(f) => setFile(f as File | null)}
-                multiple={false}
-                accept={["image/jpeg", "image/png", "image/webp"]}
-                maxSize={15 * 1024 * 1024}
-                title="Upload category image"
-                description="JPEG, PNG, WEBP — Max 15MB"
-                className="aspect-[21/9] w-full"
-              />
-            </CardContent>
-          </Card>
-
           <Card className="border-none bg-surface-container-low/30 shadow-none ring-1 ring-outline-variant/10 rounded-3xl pt-8">
             <CardContent className="space-y-6">
               {/* Name */}
@@ -157,34 +181,130 @@ export function CategoryForm({
                 />
               </div>
 
+
               {/* Parent Category */}
               <div className="space-y-2">
-                <Label htmlFor="parentId" className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+                <Label
+                  htmlFor="parentId"
+                  className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60"
+                >
                   Parent Category
                 </Label>
+
                 <Controller
                   control={control}
                   name="parentId"
-                  render={({ field }) => (
-                    <div className="relative">
-                      <select
-                        {...field}
-                        id="parentId"
-                        className="w-full appearance-none px-5 py-4 bg-surface-container-low border-none rounded-2xl text-base font-bold text-on-surface-variant focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                  render={({ field }) => {
+                    const selectedCategory = parentCategories.find(
+                      (c) => c.id === field.value
+                    );
+
+                    const getImageUrl = (url?: string) =>
+                      url
+                        ? url.startsWith("http")
+                          ? url
+                          : `https://${url}`
+                        : null;
+
+                    const selectedImage = getImageUrl(
+                      selectedCategory?.asset?.url
+                    );
+
+                    return (
+                      <Select
+                        onValueChange={(val) => field.onChange(val)}
+                        value={field.value ?? ""}
                       >
-                        <option value="">None (Root Category)</option>
-                        {parentCategories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown
-                        size={20}
-                        className="absolute right-5 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none"
-                      />
-                    </div>
-                  )}
+                        <SelectTrigger
+                          id="parentId"
+                          className="w-full px-5 py-7 bg-surface-container-low border-none rounded-2xl text-base font-bold text-on-surface-variant focus:ring-2 focus:ring-primary/20 transition-all duration-200 shadow-none"
+                        >
+                          <SelectValue>
+                            {!field.value ? (
+                              "None (Root Category)"
+                            ) : selectedCategory ? (
+                              <div className="flex items-center gap-3">
+                                {selectedImage ? (
+                                  <Image
+                                    src={selectedImage}
+                                    alt={selectedCategory.name}
+                                    width={32}
+                                    height={32}
+                                    className="w-8 h-8 rounded-full object-cover border border-outline-variant/20"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+                                    <ImageIcon
+                                      size={16}
+                                      className="text-on-surface-variant/40"
+                                    />
+                                  </div>
+                                )}
+
+                                <span className="truncate">
+                                  {selectedCategory.name}
+                                </span>
+                              </div>
+                            ) : (
+                              "None (Root Category)"
+                            )}
+                          </SelectValue>
+                        </SelectTrigger>
+
+                        <SelectContent className="rounded-2xl border-none shadow-xl bg-surface-container-lowest max-h-[300px]">
+                          {/* None Option */}
+                          <SelectItem
+                            value=""
+                            className="rounded-xl my-1 cursor-pointer font-bold text-on-surface-variant focus:bg-surface-container focus:text-on-surface"
+                          >
+                            <div className="flex items-center gap-3 py-1">
+                              <div className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+                                <ImageIcon
+                                  size={16}
+                                  className="text-on-surface-variant/40"
+                                />
+                              </div>
+                              <span>None</span>
+                            </div>
+                          </SelectItem>
+
+                          {/* Categories */}
+                          {parentCategories.map((cat) => {
+                            const imageUrl = getImageUrl(cat.asset?.url);
+
+                            return (
+                              <SelectItem
+                                key={cat.id}
+                                value={cat.id}
+                                className="rounded-xl my-1 cursor-pointer font-bold text-on-surface-variant focus:bg-surface-container focus:text-on-surface"
+                              >
+                                <div className="flex items-center gap-3 py-1">
+                                  {imageUrl ? (
+                                    <Image
+                                      src={imageUrl}
+                                      alt={cat.name}
+                                      width={32}
+                                      height={32}
+                                      className="w-8 h-8 rounded-full object-cover border border-outline-variant/20 shadow-sm bg-surface-container-lowest"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+                                      <ImageIcon
+                                        size={16}
+                                        className="text-on-surface-variant/40"
+                                      />
+                                    </div>
+                                  )}
+
+                                  <span>{cat.name}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }}
                 />
               </div>
 
@@ -257,10 +377,27 @@ export function CategoryForm({
               />
             </CardContent>
           </Card>
+          <Card className="border-none bg-surface-container-low/30 shadow-none ring-1 ring-outline-variant/10 rounded-2xl pt-4">
+            <CardContent className="p-6">
+              <Label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4 opacity-60">
+                Category Image
+              </Label>
+              <FileUploader
+                value={file}
+                onChange={(f) => setFile(f as File | null)}
+                multiple={false}
+                accept={["image/jpeg", "image/png", "image/webp"]}
+                maxSize={15 * 1024 * 1024}
+                title="Upload category image"
+                description="JPEG, PNG, WEBP — Max 15MB"
+                className="aspect-[21/9] w-full"
+                initialImageUrl={existingImageUrl || undefined}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Footer Action Bar */}
       <footer className="shrink-0 glass-panel px-8 py-6 border-t border-outline-variant/10 z-50 flex items-center justify-center bg-white/80 backdrop-blur-xl absolute bottom-0 right-0 left-0">
         <div className="flex justify-center gap-3">
           <Button
@@ -273,7 +410,7 @@ export function CategoryForm({
             ) : (
               <Save size={16} />
             )}
-            Create Category
+            {mode === "add" ? "Create Category" : "Save Changes"}
           </Button>
         </div>
       </footer>
